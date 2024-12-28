@@ -1,0 +1,55 @@
+@startuml
+header "<font color=green size=14><b>12_03_02_Копирование заказа</b></font>"
+actor "Актор" as Operator
+
+box "Производственный блок" 
+  participant "UI ERP:заявки" as UI
+  note right of UI: "Это комментарий к объекту"
+  participant "Сервер" as Server
+  database ":1_orders \n(заказы)" as Database
+  database ":1_orders_requests \n(заявки)" as Requests
+end box
+
+
+Operator -> UI : Нажимает кнопку доп.меню \n"три вертикальные точки"
+UI -> UI : Отображает информацию по \nдоп. меню (копировать, удалить)
+Operator -> UI : Нажимает кнопку "копирвать"
+UI -> UI : Отображает pop-up "Копирование заказа"
+Operator -> UI : Выбирает <font color=red>*</font>дату начала заказа
+Operator -> UI : Опционально \n"Копировать с исполнителями"
+
+
+alt "Копировать с исполнителями" выбрано
+    UI -> Server : POST /orders/OrderAdd \nЗапрос на создание заказа
+    activate Server
+    Server -> Database : INSERT INTO \n(данные заказа)
+    activate Database
+    Database --> Server : 201 Created \n(Запись успешно добавлена)
+    deactivate Database
+    Server --> UI : 200 OK \n(Заказ успешно создан)
+    deactivate Server
+
+    loop n = кол-во заявок в копируемом заказе
+        UI -> Server : POST /requests/RequestTableAdd \nЗапрос на создание заявки
+        activate Server
+        Server -> Requests : INSERT INTO \n(данные заявки)
+        activate Requests
+        Requests --> Server : 201 Created \n(Заявка успешно добавлена)
+        deactivate Requests
+        Server --> UI : 200 OK \n(Заявка успешно создана)
+        deactivate Server
+    end
+
+else "Копировать с исполнителями" не выбрано
+    UI -> Server : POST /orders/OrderAdd \nЗапрос на создание заказа
+    activate Server
+    Server -> Database : INSERT INTO \n(данные заказа)
+    activate Database
+    Database --> Server : 201 Created \n(Запись успешно добавлена)
+    deactivate Database
+    Server --> UI : 200 OK \n(Заказ успешно создан)
+    deactivate Server
+end
+
+UI -> Operator : Отображает созданный заказ \nс заполненными полями
+@enduml

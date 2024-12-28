@@ -1,0 +1,35 @@
+@startuml
+header "<font color=green size=14><b>12_03_01_Создание нового заказа</b></font>"
+actor "Актор" as Operator
+
+box "Производственный блок" 
+  participant "UI ERP:заявки" as UI
+  participant "Сервер" as Server
+  database ":1_orders (заказы)" as Database
+end box
+
+Operator -> UI : Нажимает кнопку "Добавить"
+activate UI
+UI -> UI : Создает строку для ввода данных
+Operator -> UI : Выбирает данные \n"<font color=red>*</font>Клиент", "<font color=red>*</font>Объект"
+
+alt Дата не указана
+    UI -> UI : Устанавливает значение текущей \nдаты (datetime)
+else Дата указана
+    UI -> UI : Устанавливает указанное \nзначение (datetime)
+end
+
+deactivate UI
+UI -> Server : POST /orders/OrderAdd \nЗапрос на создание заказа
+activate Server
+Server -> Database : INSERT INTO \n(данные заказа)
+activate Database
+Database --> Server : 201 Created \n(Запись успешно добавлена)
+deactivate Database
+Server --> UI : 200 OK \n(Заказ успешно создан)
+deactivate Server
+activate UI
+UI -> Operator : Отображает созданный заказ \nс заполненными полями
+deactivate UI
+
+@enduml

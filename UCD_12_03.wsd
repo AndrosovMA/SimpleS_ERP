@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+actor "Актор (Операционист, \nМенеджер по работе с клиентами)" as ActorAdmin
+
+rectangle "Работа с заказами \n(табличная форма)" {
+  usecase "1.Создание заказа" as UC1
+  usecase "2.Удаление заказа" as UC2
+  usecase "3.Копирование заказа" as UC3
+  usecase "4.Изменение заказа" as UC4
+  usecase "Добавление/редактирование \nкомментария" as UC1_Extend
+}
+
+ActorAdmin --> UC1
+ActorAdmin --> UC2
+ActorAdmin --> UC3
+ActorAdmin --> UC4
+
+UC1_Extend .u.> UC4 : <<extend>>
+UC1_Extend .u.> UC1 : <<extend>>
+
+@enduml
+
+
